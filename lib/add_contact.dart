@@ -268,31 +268,36 @@ class _AddContactState extends State<AddContact> {
     );
   }
 
-  void _insert() async {
-    var base64image;
-    if(imageFile?.exists() != null){
-       base64image = base64Encode(imageFile!.readAsBytesSync().toList());
-    }
+void _insert() async {
+  var base64image;
 
-    // row to insert
-    Map<String, dynamic> row = {
-      DatabaseHelper.columnName: _firstName.text,
-      DatabaseHelper.columnLName: _lastName.text,
-      DatabaseHelper.columnMobile: _mobileNumber.text,
-      DatabaseHelper.columnEmail: _emailAddress.text,
-      DatabaseHelper.columnCategory: currentCategory,
-      DatabaseHelper.columnProfile: base64image,
-    };
-    print('insert stRT');
-    currentCategory="";
-
-    final id = await dbHelper.insertContact(row);
-    if (kDebugMode) {
-      print('inserted row id: $id');
-    }
-    _query();
-    Navigator.push(context, MaterialPageRoute(builder: (_)=>ContactList()));
+  // Periksa apakah imageFile tidak null dan ada
+  if (imageFile != null && imageFile!.existsSync()) {
+    base64image = base64Encode(imageFile!.readAsBytesSync().toList());
+  } else {
+    base64image = null; // Atur base64image menjadi null jika gambar tidak diisi
   }
+
+  // row to insert
+  Map<String, dynamic> row = {
+    DatabaseHelper.columnName: _firstName.text,
+    DatabaseHelper.columnLName: _lastName.text,
+    DatabaseHelper.columnMobile: _mobileNumber.text,
+    DatabaseHelper.columnEmail: _emailAddress.text,
+    DatabaseHelper.columnCategory: currentCategory,
+    DatabaseHelper.columnProfile: base64image,
+  };
+  print('insert stRT');
+  currentCategory = "";
+
+  final id = await dbHelper.insertContact(row);
+  if (kDebugMode) {
+    print('inserted row id: $id');
+  }
+  _query();
+  Navigator.push(context, MaterialPageRoute(builder: (_) => ContactList()));
+}
+
 
   void _query() async {
     final allRows = await dbHelper.queryAllRows();
