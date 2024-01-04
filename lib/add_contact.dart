@@ -291,14 +291,13 @@ class _AddContactState extends State<AddContact> {
     );
   }
 
-  // Method to insert contact into the database
   void _insert() async {
     var base64image;
-    if (imageFile?.exists() != null) {
-      base64image = base64Encode(imageFile!.readAsBytesSync().toList());
+    if(imageFile?.exists() != null){
+       base64image = base64Encode(imageFile!.readAsBytesSync().toList());
     }
 
-    // Row to insert into the database
+    // row to insert
     Map<String, dynamic> row = {
       DatabaseHelper.columnName: _firstName.text,
       DatabaseHelper.columnLName: _lastName.text,
@@ -307,18 +306,15 @@ class _AddContactState extends State<AddContact> {
       DatabaseHelper.columnCategory: currentCategory,
       DatabaseHelper.columnProfile: base64image,
     };
+    print('insert stRT');
+    currentCategory="";
 
-    // Inserting row into the database
-    currentCategory = "";
     final id = await dbHelper.insertContact(row);
-    
     if (kDebugMode) {
       print('inserted row id: $id');
     }
-    
-    // Refresh the category list and navigate to contact list
     _query();
-    Navigator.push(context, MaterialPageRoute(builder: (_) => ContactList()));
+    Navigator.push(context, MaterialPageRoute(builder: (_)=>ContactList()));
   }
 
   // Method to query all rows from the database

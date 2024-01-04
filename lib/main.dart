@@ -18,6 +18,7 @@ void main() {
 
 /// The `MyApp` class is a StatelessWidget representing the root of the application.
 class MyApp extends StatelessWidget {
+
   const MyApp({Key? key}) : super(key: key);
 
   /// This widget is the root of your application.
