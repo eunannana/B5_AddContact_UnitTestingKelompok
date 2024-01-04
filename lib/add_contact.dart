@@ -11,7 +11,6 @@ import 'package:hahahaha/colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:signature/signature.dart';
 
-
 import 'db_manager.dart';
 import 'mydrawal.dart';
 
@@ -23,31 +22,48 @@ class AddContact extends StatefulWidget {
 }
 
 class _AddContactState extends State<AddContact> {
+  // Controllers for input fields
   final TextEditingController _firstName = TextEditingController();
   final TextEditingController _lastName = TextEditingController();
   final TextEditingController _mobileNumber = TextEditingController();
   final TextEditingController _emailAddress = TextEditingController();
+
+  // GlobalKey for the form
   final formGlobalKey = GlobalKey<FormState>();
+
+  // File for storing the selected image
   File? imageFile;
+
+  // ImagePicker instance
   final ImagePicker _picker = ImagePicker();
+
+  // Current selected category
   String currentCategory = "";
+
+  // Encoded image data
   var imageEncoded;
+
+  // List to store all categories
   List<String> allCategoryData = [];
+
+  // Database helper instance
   final dbHelper = DatabaseHelper.instance;
+
+  // Future to hold image bytes
   late Future<Uint8List> imageBytes;
+
+  // Signature controller for signature capture
   final SignatureController _controller = SignatureController(
     penStrokeWidth: 5,
     penColor: Colors.red,
     exportBackgroundColor: Colors.blue,
   );
 
-// INITIALIZE. RESULT IS A WIDGET, SO IT CAN BE DIRECTLY USED IN BUILD METHOD
-
-
   @override
   void initState() {
     super.initState();
     _query();
+    // Initialize the signature canvas
     var _signatureCanvas = Signature(
       controller: _controller,
       width: 300,
@@ -55,6 +71,7 @@ class _AddContactState extends State<AddContact> {
       backgroundColor: Colors.lightBlueAccent,
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -79,6 +96,7 @@ class _AddContactState extends State<AddContact> {
                       const SizedBox(
                         height: 20,
                       ),
+                      // Image selection widget
                       InkWell(
                         onTap: () async {
                           final XFile? pickedFile = await _picker.pickImage(
@@ -112,6 +130,7 @@ class _AddContactState extends State<AddContact> {
                       SizedBox(
                         height: 20,
                       ),
+                      // Input fields for contact information
                       TextFormField(
                         decoration: InputDecoration(
                           focusedBorder: OutlineInputBorder(
@@ -212,6 +231,7 @@ class _AddContactState extends State<AddContact> {
                       SizedBox(
                         height: 20,
                       ),
+                      // Dropdown for selecting category
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
@@ -231,13 +251,16 @@ class _AddContactState extends State<AddContact> {
                               currentCategory = selectedItem!;
                             }),
                             hint: Text("Select Category "),
-                            value: currentCategory.isEmpty ? null : currentCategory,
+                            value: currentCategory.isEmpty
+                                ? null
+                                : currentCategory,
                           ),
                         ),
                       ),
                       const SizedBox(
                         height: 20,
                       ),
+                      // Save button
                       TextButtonTheme(
                         data: TextButtonThemeData(
                           style: ButtonStyle(
@@ -268,13 +291,14 @@ class _AddContactState extends State<AddContact> {
     );
   }
 
+  // Method to insert contact into the database
   void _insert() async {
     var base64image;
-    if(imageFile?.exists() != null){
-       base64image = base64Encode(imageFile!.readAsBytesSync().toList());
+    if (imageFile?.exists() != null) {
+      base64image = base64Encode(imageFile!.readAsBytesSync().toList());
     }
 
-    // row to insert
+    // Row to insert into the database
     Map<String, dynamic> row = {
       DatabaseHelper.columnName: _firstName.text,
       DatabaseHelper.columnLName: _lastName.text,
@@ -283,22 +307,29 @@ class _AddContactState extends State<AddContact> {
       DatabaseHelper.columnCategory: currentCategory,
       DatabaseHelper.columnProfile: base64image,
     };
-    print('insert stRT');
-    currentCategory="";
 
+    // Inserting row into the database
+    currentCategory = "";
     final id = await dbHelper.insertContact(row);
+    
     if (kDebugMode) {
       print('inserted row id: $id');
     }
+    
+    // Refresh the category list and navigate to contact list
     _query();
-    Navigator.push(context, MaterialPageRoute(builder: (_)=>ContactList()));
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ContactList()));
   }
 
+  // Method to query all rows from the database
   void _query() async {
     final allRows = await dbHelper.queryAllRows();
+    
     if (kDebugMode) {
       print('query all rows:');
     }
+    
+    // Populate the category list
     for (var element in allRows) {
       allCategoryData.add(element["name"]);
     }
